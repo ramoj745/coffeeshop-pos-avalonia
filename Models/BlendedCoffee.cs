@@ -1,11 +1,11 @@
 namespace CoffeeShopPOS.Models
 {
 
-    public class IcedCoffee : Beverage
+    public class BlendedCoffee : Beverage
     {
-        public IcedCoffee()
+        public BlendedCoffee()
         {
-            Category = "Iced";  
+            Category = "Blended";  
         }
         
 
@@ -20,11 +20,11 @@ namespace CoffeeShopPOS.Models
                     break;
                 case "M":
                 case "MEDIUM":
-                    price += 25;
+                    price += 30;
                     break;
                 case "L":
                 case "LARGE":
-                    price += 45;
+                    price += 50;
                     break;
             }
             

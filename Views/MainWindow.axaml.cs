@@ -18,20 +18,28 @@ public partial class MainWindow : Window
         HotCoffee hotAmericano = new()
         {
             Code = "C002",
-            Name = "Hot Americano",
+            Name = "Americano",
             BasePrice = 65
         };
 
         IcedCoffee icedAmericano = new()
         {
             Code = "C001",
-            Name = "Iced Americano",
+            Name = "Americano",
             BasePrice = 75
+        };
+
+        BlendedCoffee matchaFrappucino = new()
+        {
+            Code = "C005",
+            Name = "Matcha Frappucino",
+            BasePrice = 120
         };
 
         // tests
         PrintBeveragePrices(hotAmericano);
         PrintBeveragePrices(icedAmericano);
+        PrintBeveragePrices(matchaFrappucino);
 
     }
 
