@@ -1,56 +1,71 @@
-using System;
-using Avalonia.Controls;
 using CoffeeShopPOS.Models;
+using System;
+using System.Collections.Generic;
+using Avalonia.Controls;
+using Avalonia.Interactivity;
 
-namespace CoffeeShopPOS.Views;
-
-public partial class MainWindow : Window
+namespace CoffeeShopPOS.Views
 {
-    public MainWindow()
+    public partial class MainWindow : Window
     {
-        InitializeComponent();
-        TestBeverageClass();
-    }
-
-    private void TestBeverageClass()
-    {
-
-        HotCoffee hotAmericano = new()
+        private List<Beverage> menuItems = new List<Beverage>();
+        
+        public MainWindow()
         {
-            Code = "C002",
-            Name = "Americano",
-            BasePrice = 65
-        };
-
-        IcedCoffee icedAmericano = new()
+            // loads the XAML file
+            InitializeComponent();
+            // loads the created objects inside our list
+            LoadSampleMenu();
+            // displays the menu
+            DisplayMenu();
+        }
+        
+        private void LoadSampleMenu()
         {
-            Code = "C001",
-            Name = "Americano",
-            BasePrice = 75
-        };
-
-        BlendedCoffee matchaFrappucino = new()
+            menuItems = new List<Beverage>
+            {
+                new HotCoffee { Code = "C001", Name = "Americano", BasePrice = 95 },
+                new HotCoffee { Code = "C002", Name = "Cappuccino", BasePrice = 120 },
+                new IcedCoffee { Code = "C003", Name = "Caramel Macchiato", BasePrice = 145 },
+                new IcedCoffee { Code = "C004", Name = "Iced Latte", BasePrice = 130 },
+                new BlendedCoffee { Code = "C005", Name = "Mocha Frappuccino", BasePrice = 165 }
+            };
+            
+            Console.WriteLine($"Menu loaded with {menuItems.Count} items");
+        }
+        
+        private void DisplayMenu()
         {
-            Code = "C005",
-            Name = "Matcha Frappucino",
-            BasePrice = 120
-        };
-
-        // tests
-        PrintBeveragePrices(hotAmericano);
-        PrintBeveragePrices(icedAmericano);
-        PrintBeveragePrices(matchaFrappucino);
-
+            // Find ItemsControl in XAML
+            var menuControl = this.FindControl<ItemsControl>("MenuItemsControl");
+            
+            if (menuControl == null)
+            {
+                Console.WriteLine("Error: MenuItemsControl not found!");
+                return;
+            }
+            
+            // Set the items
+            menuControl.ItemsSource = menuItems;
+            
+            Console.WriteLine($"Displayed {menuItems.Count} menu items");
+            
+            // Debug output
+            foreach (var item in menuItems)
+            {
+                Console.WriteLine($"  {item.Code} - {item.Name} - {item.Category} - ₱{item.BasePrice}");
+            }
+        }
+        
+        private void BtnRefreshMenu_Click(object? sender, RoutedEventArgs e)
+        {
+            DisplayMenu();
+            Console.WriteLine("Menu refreshed!");
+        }
+        
+        private void BtnExit_Click(object? sender, RoutedEventArgs e)
+        {
+            Close();
+        }
     }
-
-    private void PrintBeveragePrices(Beverage beverage)
-    {
-        Console.WriteLine("Type of Beverage: " + beverage.Category);
-        Console.WriteLine("Name of Beverage: " + beverage.Name);
-        Console.WriteLine("Small: P" + beverage.CalculatePrice("S"));
-        Console.WriteLine("Medium: P" + beverage.CalculatePrice("M"));
-        Console.WriteLine("Large: P" + beverage.CalculatePrice("L"));
-
-    }
-    
 }
