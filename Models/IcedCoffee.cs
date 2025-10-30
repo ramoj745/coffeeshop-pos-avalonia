@@ -1,6 +1,6 @@
 namespace CoffeeShopPOS.Models
 {
-
+    // inherit from Beverage
     public class IcedCoffee : Beverage
     {
         public IcedCoffee(string code, string name, decimal basePrice)
@@ -14,6 +14,7 @@ namespace CoffeeShopPOS.Models
 
         public override decimal CalculatePrice(string size)
         {
+            // Iced coffee pricing logic
             decimal price = BasePrice;
             
             switch (size.ToUpper())

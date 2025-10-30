@@ -20,13 +20,43 @@ namespace CoffeeShopPOS.Views
             DisplayMenu();
             // Test addons
             TestAddOns();
+            // Test Customer
+            TestCustomers();
         }
-        
+
         private void TestAddOns()
         {
             Console.WriteLine("\nTesting Addons");
             AddOn extraShot = new AddOn("Extra Shot", 25);
             Console.WriteLine(extraShot);
+        }
+        
+        public void TestCustomers()
+        {
+            Console.WriteLine("\n Testing Customers");
+            Customer pwd = new PWDCustomer("C001", "Juan");
+
+            decimal amount = 500m;
+
+            Console.WriteLine($"Order Amount: ₱{amount:F2}\n");
+            Console.WriteLine(pwd);
+            decimal regularDiscount = pwd.ApplyDiscount(amount);
+            Console.WriteLine($"Discount: ₱{regularDiscount:F2}");
+            Console.WriteLine($"Final: ₱{amount - regularDiscount:F2}\n");
+
+            List<Customer> customers = new List<Customer>
+            {
+                new RegularCustomer("C004", "Ana Lopez"),
+                new PWDCustomer("C005", "Ramoj Mabilangan"),
+                new SeniorCustomer("C006", "Tin Solis")
+            };
+
+            foreach(Customer customer in customers)
+            {
+                decimal discount = customer.ApplyDiscount(amount);
+                Console.WriteLine($"{customer.Name} ({customer.Type}) - {customer.Id} : Discount {discount}");
+            }
+
         }
         
         private void LoadSampleMenu()

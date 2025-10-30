@@ -7,7 +7,7 @@ namespace CoffeeShopPOS.Models
         
         public HotCoffee(string code, string name, decimal basePrice)
         {
-            Category = "Hot";  // Set the category automatically
+            Category = "Hot";  // we set the category automatically
             Code = code;
             Name = name;
             BasePrice = basePrice;
