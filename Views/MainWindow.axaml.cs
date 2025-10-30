@@ -22,8 +22,39 @@ namespace CoffeeShopPOS.Views
             TestAddOns();
             // Test Customer
             TestCustomers();
+
+            // Test adding to order for customer
+            TestAddOrder();
         }
 
+        private void TestAddOrder()
+        {
+            Console.WriteLine("\nTesting OrderItem");
+            Console.WriteLine("\n Customer 1:");
+            Customer ramoj = new PWDCustomer("C001", "Ramoj Mabilangan");
+
+            decimal money = 900m;
+
+            Console.WriteLine($"\n For Customer: {ramoj.Name}");
+            Console.WriteLine($"\n Money: {money}");
+            Console.WriteLine($"\n Customer Type: {ramoj.Type}");
+
+            Beverage caramelMacchiato = new IcedCoffee("C003", "Caramel Macchiato", 120);
+
+            OrderItem item1 = new OrderItem(caramelMacchiato, "Medium", 3);
+
+            item1.AddAddOn(new AddOn("Extra Shot", 25));
+            item1.AddAddOn(new AddOn("Whipped Cream", 30));
+
+            Console.WriteLine("\n Order Item 1:");
+            Console.WriteLine($"\n {item1.GetDescription()}");
+
+            decimal discount = ramoj.ApplyDiscount(item1.GetTotalPrice());
+
+            Console.WriteLine($"\n Discount: {discount}");
+            Console.WriteLine($"\n After Discount: {item1.GetTotalPrice() - discount}");
+
+        }
         private void TestAddOns()
         {
             Console.WriteLine("\nTesting Addons");
@@ -69,8 +100,9 @@ namespace CoffeeShopPOS.Views
                 new IcedCoffee("C004", "Iced Latte", 130),
                 new BlendedCoffee("C005", "Mocha Frappuccino", 165)
             };
-            
+
             Console.WriteLine($"Menu loaded with {menuItems.Count} items");
+
         }
         
         private void DisplayMenu()
