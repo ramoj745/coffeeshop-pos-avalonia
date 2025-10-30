@@ -9,7 +9,7 @@ namespace CoffeeShopPOS.Views
     public partial class MainWindow : Window
     {
         private List<Beverage> menuItems = new List<Beverage>();
-        
+
         public MainWindow()
         {
             // loads the XAML file
@@ -18,17 +18,26 @@ namespace CoffeeShopPOS.Views
             LoadSampleMenu();
             // displays the menu
             DisplayMenu();
+            // Test addons
+            TestAddOns();
+        }
+        
+        private void TestAddOns()
+        {
+            Console.WriteLine("\nTesting Addons");
+            AddOn extraShot = new AddOn("Extra Shot", 25);
+            Console.WriteLine(extraShot);
         }
         
         private void LoadSampleMenu()
         {
             menuItems = new List<Beverage>
             {
-                new HotCoffee { Code = "C001", Name = "Americano", BasePrice = 95 },
-                new HotCoffee { Code = "C002", Name = "Cappuccino", BasePrice = 120 },
-                new IcedCoffee { Code = "C003", Name = "Caramel Macchiato", BasePrice = 145 },
-                new IcedCoffee { Code = "C004", Name = "Iced Latte", BasePrice = 130 },
-                new BlendedCoffee { Code = "C005", Name = "Mocha Frappuccino", BasePrice = 165 }
+                new HotCoffee("C001", "Americano", 95),
+                new HotCoffee("C002", "Cappuccino", 120),
+                new IcedCoffee("C003", "Caramel Macchiato", 145),
+                new IcedCoffee("C004", "Iced Latte", 130),
+                new BlendedCoffee("C005", "Mocha Frappuccino", 165)
             };
             
             Console.WriteLine($"Menu loaded with {menuItems.Count} items");

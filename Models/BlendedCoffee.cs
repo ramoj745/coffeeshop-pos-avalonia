@@ -3,9 +3,12 @@ namespace CoffeeShopPOS.Models
 
     public class BlendedCoffee : Beverage
     {
-        public BlendedCoffee()
+        public BlendedCoffee(string code, string name, decimal basePrice)
         {
-            Category = "Blended";  
+            Category = "Blended";
+            Code = code;
+            Name = name;
+            BasePrice = basePrice;
         }
         
 

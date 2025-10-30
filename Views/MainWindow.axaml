@@ -53,7 +53,7 @@
                             <DataTemplate DataType="models:Beverage">
                                 <Border Padding="10,8" 
                                         Margin="0,5"
-                                        Background="#000000ff"
+                                        Background="#ffffffff"
                                         CornerRadius="5">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -63,10 +63,10 @@
                                             <ColumnDefinition Width="120"/>
                                         </Grid.ColumnDefinitions>
                                         
-                                        <TextBlock Grid.Column="0" Text="{Binding Code}"/>
-                                        <TextBlock Grid.Column="1" Text="{Binding Name}"/>
-                                        <TextBlock Grid.Column="2" Text="{Binding Category}"/>
-                                        <TextBlock Grid.Column="3" Text="{Binding BasePrice, StringFormat='₱{0:F2}'}"/>
+                                        <TextBlock Grid.Column="0" Text="{Binding Code}" Foreground="Black"/>
+                                        <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="Black"/>
+                                        <TextBlock Grid.Column="2" Text="{Binding Category}" Foreground="Black"/>
+                                        <TextBlock Grid.Column="3" Text="{Binding BasePrice, StringFormat='₱{0:F2}'}" Foreground="Black"/>
                                     </Grid>
                                 </Border>
                             </DataTemplate>
