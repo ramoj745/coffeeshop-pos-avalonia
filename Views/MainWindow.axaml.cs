@@ -25,6 +25,55 @@ namespace CoffeeShopPOS.Views
 
             // Test adding to order for customer
             TestAddOrder();
+
+            // test order
+            TestOrder();
+        }
+
+        private void TestOrder()
+        {
+            Console.WriteLine("\nTesting Order Class");
+
+            // create our customer
+            Customer customer = new SeniorCustomer("C001", "Maria Santos");
+            // Create Order
+            Order order = new Order();
+
+            // set created customer to order
+            order.Customer = customer;
+
+            Console.WriteLine($"Created Order ID: {order.OrderId}");
+            Console.WriteLine();
+
+            // add items to the order
+            Beverage caramelMacchiato = new IcedCoffee("C003", "Caramel Macchiato", 145);
+            OrderItem item1 = new OrderItem(caramelMacchiato, "Medium", 4);
+
+            item1.AddAddOn(new AddOn("Extra Shot", 25));
+
+            // add the item to the order
+            order.AddItem(item1);
+
+            Console.WriteLine(order.GetOrderSummary());
+            Console.WriteLine();
+
+            // Calculation breakdown
+            Console.WriteLine("\n ORDER CALCULATION SUMMARY");
+
+            decimal subtotal = order.CalculateSubtotal();
+            decimal discount = order.CalculateCustomerDiscount();
+            decimal total = order.CalculateTotal();
+
+            Console.WriteLine($"Subtotal: ₱{subtotal:F2}");
+            Console.WriteLine($"Customer Type: {customer.Type}");
+            Console.WriteLine($"Discount (20%): -₱{discount:F2}");
+            Console.WriteLine($"Final Total: ₱{total:F2}");
+            Console.WriteLine();
+            Console.WriteLine($"With Loyalty Discount: ₱{order.CalculateTotal(70)}");
+
+            Console.WriteLine($"{order.GetOrderSummary()}");
+
+
         }
 
         private void TestAddOrder()
