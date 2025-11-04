@@ -22,12 +22,107 @@ namespace CoffeeShopPOS.Views
             TestAddOns();
             // Test Customer
             TestCustomers();
-
             // Test adding to order for customer
             TestAddOrder();
-
             // test order
             TestOrder();
+            // Test LoyaltyAccount
+            TestLoyaltyAccount();
+        }
+
+        private void TestLoyaltyAccount()
+        {
+            Customer customer = new PWDCustomer("C001", "Ramoj");
+            customer.LoyaltyAccount = new LoyaltyAccount(customer.Id);
+
+            Console.WriteLine($"Customer: {customer.Name}");
+            Console.WriteLine(customer.LoyaltyAccount);
+            Console.WriteLine();
+
+            Console.WriteLine("=== EARNING POINTS ===");
+            decimal amount1 = 1064m; // sample paying amount
+
+            customer.LoyaltyAccount.EarnPoints(amount1);
+
+            Console.WriteLine($"Spent ₱{amount1:F2} → Earned {(int)(amount1 / 50)} points");
+            Console.WriteLine($"Balance: {customer.LoyaltyAccount.Points} points");
+            Console.WriteLine();
+
+            // Test redemption info
+            Console.WriteLine("=== REDEMPTION INFO ===");
+            int maxRedeemable = customer.LoyaltyAccount.GetMaxRedeemablePoints();
+            decimal discountValue = customer.LoyaltyAccount.GetDiscountValue(maxRedeemable);
+            Console.WriteLine($"Can redeem: {maxRedeemable} points");
+            Console.WriteLine($"Discount value: ₱{discountValue:F2}");
+            Console.WriteLine($"Points to next reward: {customer.LoyaltyAccount.GetPointsToNextReward()}");
+            Console.WriteLine();
+
+            // Test redeeming points - VALID
+            Console.WriteLine("=== REDEEMING 10 POINTS ===");
+            bool success = customer.LoyaltyAccount.RedeemPoints(10);
+            Console.WriteLine($"Redemption success: {success}");
+            Console.WriteLine($"New balance: {customer.LoyaltyAccount.Points} points");
+            Console.WriteLine($"Discount received: ₱{customer.LoyaltyAccount.GetDiscountValue(10):F2}");
+            Console.WriteLine();
+
+            // Try to redeem 100 points (more than balance)
+            Console.WriteLine("Trying to redeem 100 points...");
+            success = customer.LoyaltyAccount.RedeemPoints(100);
+            Console.WriteLine($"Result: {(success ? "Success" : "Failed - insufficient points")}");
+            Console.WriteLine($"Current balance: {customer.LoyaltyAccount.Points} points");
+            Console.WriteLine();
+
+            // Test with CanRedeem method
+            Console.WriteLine("=== CHECKING REDEMPTION VALIDITY ===");
+            Console.WriteLine($"Can redeem 10? {customer.LoyaltyAccount.CanRedeem(10)}");
+            Console.WriteLine($"Can redeem 5? {customer.LoyaltyAccount.CanRedeem(5)}");
+            Console.WriteLine($"Can redeem 100? {customer.LoyaltyAccount.CanRedeem(100)}");
+            Console.WriteLine();
+
+            // Complete transaction example with order
+            Console.WriteLine("=== COMPLETE TRANSACTION WITH LOYALTY ===");
+            
+            // Create an order
+            Order order = new Order();
+            order.Customer = customer;
+            
+            Beverage coffee = new HotCoffee("C001", "Americano", 95);
+            OrderItem item = new OrderItem(coffee, "Medium", 3);
+            order.AddItem(item);
+            
+            // Calculate totals
+            decimal subtotal = order.CalculateSubtotal();
+            decimal customerDiscount = order.CalculateCustomerDiscount();
+            
+            Console.WriteLine($"Subtotal: ₱{subtotal:F2}");
+            Console.WriteLine($"Customer Discount: -₱{customerDiscount:F2}");
+            
+            // Redeem loyalty points
+            int pointsToRedeem = 0;  // Customer's current balance is only 4 now
+            if (customer.LoyaltyAccount.CanRedeem(10))
+            {
+                // This won't execute because balance is only 4 points
+                pointsToRedeem = 10;
+                customer.LoyaltyAccount.RedeemPoints(pointsToRedeem);
+            }
+            
+            decimal loyaltyDiscount = customer.LoyaltyAccount.GetDiscountValue(pointsToRedeem);
+            Console.WriteLine($"Loyalty Discount: -₱{loyaltyDiscount:F2}");
+            
+            decimal total = subtotal - customerDiscount - loyaltyDiscount;
+            Console.WriteLine($"Total: ₱{total:F2}");
+            Console.WriteLine();
+            
+            // Earn points from this purchase
+            int pointsBefore = customer.LoyaltyAccount.Points;
+            customer.LoyaltyAccount.EarnPoints(total);
+            int pointsEarned = customer.LoyaltyAccount.Points - pointsBefore;
+            
+            Console.WriteLine($"Points earned: +{pointsEarned}");
+            Console.WriteLine($"New balance: {customer.LoyaltyAccount.Points} points");
+            
+            Console.WriteLine("\n==============================\n");
+
         }
 
         private void TestOrder()

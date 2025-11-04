@@ -9,6 +9,7 @@ namespace CoffeeShopPOS.Models
         public string Name { get; set; }
         public string Type { get; set; } // Regular, Senior, or PWD
         public DateTime DateRegistered { get; set; }
+        public LoyaltyAccount? LoyaltyAccount { get; set; }
 
 
         // Every customer type will calculate discounts differently
