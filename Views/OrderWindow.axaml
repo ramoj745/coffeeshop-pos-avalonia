@@ -1,0 +1,264 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:models="using:CoffeeShopPOS.Models"
+        x:Class="CoffeeShopPOS.Views.OrderWindow"
+        Title="New Order"
+        Width="900" Height="700"
+        WindowStartupLocation="CenterScreen">
+    
+    <Grid Margin="20">
+        <!-- Define 2 columns: Menu on left, Cart on right -->
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>      <!-- Menu side -->
+            <ColumnDefinition Width="400"/>    <!-- Cart side -->
+        </Grid.ColumnDefinitions>
+        
+        <!-- LEFT SIDE: Menu and Item Selection -->
+        <Border Grid.Column="0" 
+                BorderBrush="LightGray" 
+                BorderThickness="1"
+                CornerRadius="5"
+                Padding="15"
+                Margin="0,0,10,0">
+            
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>  <!-- Title -->
+                    <RowDefinition Height="Auto"/>  <!-- Customer info -->
+                    <RowDefinition Height="*"/>     <!-- Menu -->
+                    <RowDefinition Height="Auto"/>  <!-- Customization -->
+                    <RowDefinition Height="Auto"/>  <!-- Add button -->
+                </Grid.RowDefinitions>
+                
+                <!-- Title -->
+                <TextBlock Grid.Row="0"
+                           Text="SELECT ITEM"
+                           FontSize="20"
+                           FontWeight="Bold"
+                           Margin="0,0,0,15"/>
+                
+                <!-- Customer Info -->
+                <StackPanel Grid.Row="1" 
+                            Margin="0,0,0,15">
+                    <TextBlock x:Name="TxtCustomerInfo"
+                               Text="Customer: Walk-in"
+                               FontSize="14"
+                               Foreground="Gray"/>
+                </StackPanel>
+                
+                <!-- Menu List -->
+                <Border Grid.Row="2"
+                        BorderBrush="Gray"
+                        BorderThickness="1"
+                        CornerRadius="3"
+                        Margin="0,0,0,15">
+                    
+                    <ScrollViewer>
+                        <ItemsControl x:Name="MenuItemsControl">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="models:Beverage">
+                                    <Border Padding="10"
+                                            Margin="5"
+                                            Background="#F9F9F9"
+                                            CornerRadius="5"
+                                            Cursor="Hand"
+                                            PointerPressed="MenuItem_Tapped">
+                                        
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="{Binding Name}"
+                                                           FontWeight="Bold"
+                                                           FontSize="14"
+                                                           Foreground="Black"/>
+                                                <TextBlock Text="{Binding Category}"
+                                                           FontSize="12"
+                                                           Foreground="Gray"/>
+                                            </StackPanel>
+                                            
+                                            <TextBlock Grid.Column="1"
+                                                       Text="{Binding BasePrice, StringFormat='₱{0:F2}'}"
+                                                       FontSize="14"
+                                                       FontWeight="Bold"
+                                                       VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Border>
+                
+                <!-- Customization Panel -->
+                <Border Grid.Row="3"
+                        BorderBrush="LightGray"
+                        BorderThickness="1"
+                        CornerRadius="5"
+                        Padding="10"
+                        Margin="0,0,0,10"
+                        x:Name="CustomizationPanel"
+                        IsVisible="False"> 
+                    
+                    <StackPanel Spacing="10">
+                        <!-- Selected Item Display -->
+                        <TextBlock x:Name="TxtSelectedItem"
+                                   Text="Selected: None"
+                                   FontWeight="Bold"
+                                   FontSize="14"/>
+                        
+                        <!-- Size Selection -->
+                        <StackPanel>
+                            <TextBlock Text="Size:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <RadioButton x:Name="RbSmall" 
+                                             Content="Small" 
+                                             GroupName="Size"
+                                             IsChecked="True"/>
+                                <RadioButton x:Name="RbMedium" 
+                                             Content="Medium (+₱20)" 
+                                             GroupName="Size"/>
+                                <RadioButton x:Name="RbLarge" 
+                                             Content="Large (+₱40)" 
+                                             GroupName="Size"/>
+                            </StackPanel>
+                        </StackPanel>
+                        
+                        <!-- Add-ons -->
+                        <StackPanel>
+                            <TextBlock Text="Add-ons:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                            <CheckBox x:Name="ChkExtraShot" Content="Extra Shot (+₱25)"/>
+                            <CheckBox x:Name="ChkWhippedCream" Content="Whipped Cream (+₱15)"/>
+                            <CheckBox x:Name="ChkCaramelDrizzle" Content="Caramel Drizzle (+₱20)"/>
+                        </StackPanel>
+                        
+                        <!-- Quantity -->
+                        <StackPanel>
+                            <TextBlock Text="Quantity:" FontWeight="SemiBold" Margin="0,0,0,5"/>
+                            <NumericUpDown x:Name="NumQuantity"
+                                           Minimum="1"
+                                           Maximum="99"
+                                           Value="1"
+                                           Width="100"/>
+                        </StackPanel>
+                        
+                    </StackPanel>
+                </Border>
+                
+                <!-- Add to Order Button -->
+                <Button Grid.Row="4"
+                        x:Name="BtnAddToOrder"
+                        Content="Add to Order"
+                        HorizontalAlignment="Stretch"
+                        Height="45"
+                        FontSize="16"
+                        IsEnabled="False"
+                        Click="BtnAddToOrder_Click"/>
+                
+            </Grid>
+        </Border>
+        
+        <!-- RIGHT SIDE: Current Order / Cart -->
+        <Border Grid.Column="1"
+                BorderBrush="LightGray"
+                BorderThickness="1"
+                CornerRadius="5"
+                Padding="15">
+            
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>  <!-- Title -->
+                    <RowDefinition Height="*"/>     <!-- Items list -->
+                    <RowDefinition Height="Auto"/>  <!-- Totals -->
+                    <RowDefinition Height="Auto"/>  <!-- Buttons -->
+                </Grid.RowDefinitions>
+                
+                <!-- Title -->
+                <TextBlock Grid.Row="0"
+                           Text="CURRENT ORDER"
+                           FontSize="20"
+                           FontWeight="Bold"
+                           Margin="0,0,0,15"/>
+                
+                <!-- Order Items List -->
+                <Border Grid.Row="1"
+                        BorderBrush="Gray"
+                        BorderThickness="1"
+                        CornerRadius="3"
+                        Margin="0,0,0,15">
+                    
+                    <ScrollViewer>
+                        <StackPanel x:Name="OrderItemsPanel" Spacing="10" Margin="10">
+                            <!-- Order items will be added here programmatically -->
+                            <TextBlock Text="No items in order"
+                                       Foreground="Gray"
+                                       HorizontalAlignment="Center"
+                                       VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+                
+                <!-- Totals -->
+                <Border Grid.Row="2"
+                        Background="#F5F5F5"
+                        Padding="10"
+                        CornerRadius="5"
+                        Margin="0,0,0,15">
+                    
+                    <StackPanel Spacing="5">
+                        <Grid>
+                            <TextBlock Text="Subtotal:"
+                                       FontWeight="SemiBold"
+                                       Foreground="Black"/>
+                            <TextBlock x:Name="TxtSubtotal"
+                                       Text="₱0.00"
+                                       HorizontalAlignment="Right"
+                                       FontWeight="Bold"/>
+                        </Grid>
+                        
+                        <Separator/>
+                        
+                        <Grid>
+                            <TextBlock Text="Items:"
+                                       Foreground="Gray"
+                                       FontSize="12"/>
+                            <TextBlock x:Name="TxtItemCount"
+                                       Text="0"
+                                       HorizontalAlignment="Right"
+                                       Foreground="Gray"
+                                       FontSize="12"/>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Action Buttons -->
+                <StackPanel Grid.Row="3" Spacing="10">
+                    <Button Content="Proceed to Checkout"
+                            x:Name="BtnCheckout"
+                            HorizontalAlignment="Stretch"
+                            Height="45"
+                            FontSize="16"
+                            IsEnabled="False"
+                            Click="BtnCheckout_Click"/>
+                    
+                    <Button Content="Clear Order"
+                            x:Name="BtnClearOrder"
+                            HorizontalAlignment="Stretch"
+                            Height="40"
+                            Click="BtnClearOrder_Click"/>
+                    
+                    <Button Content="Cancel"
+                            HorizontalAlignment="Stretch"
+                            Height="40"
+                            Click="BtnCancel_Click"/>
+                </StackPanel>
+                
+            </Grid>
+        </Border>
+        
+    </Grid>
+    
+</Window>

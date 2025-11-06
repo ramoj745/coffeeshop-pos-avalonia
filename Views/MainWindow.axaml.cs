@@ -18,16 +18,25 @@ namespace CoffeeShopPOS.Views
             LoadSampleMenu();
             // displays the menu
             DisplayMenu();
-            // Test addons
-            TestAddOns();
-            // Test Customer
-            TestCustomers();
-            // Test adding to order for customer
-            TestAddOrder();
-            // test order
-            TestOrder();
-            // Test LoyaltyAccount
-            TestLoyaltyAccount();
+
+
+
+            // // Test addons
+            // TestAddOns();
+            // // Test Customer
+            // TestCustomers();
+            // // Test adding to order for customer
+            // TestAddOrder();
+            // // test order
+            // TestOrder();
+            // // Test LoyaltyAccount
+            // TestLoyaltyAccount();
+        }
+
+        private void BtnNewOrder_Click(object? sender, RoutedEventArgs e)
+        {
+            var orderWindow = new OrderWindow();
+            orderWindow.Show();
         }
 
         private void TestLoyaltyAccount()
