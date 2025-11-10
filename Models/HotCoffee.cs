@@ -1,6 +1,6 @@
 namespace CoffeeShopPOS.Models
 {
-    // HotCoffee inherits from Beverage (same case w/ IcedCoffee)
+    // HotCoffee inherits from Beverage (same case w/ IcedCoffee and BlendedCoffee)
     // This means HotCoffee gets all properties from Beverage
     public class HotCoffee : Beverage
     {
