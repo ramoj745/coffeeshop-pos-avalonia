@@ -248,10 +248,10 @@ namespace CoffeeShopPOS.Views
             menuItems = new List<Beverage>
             {
                 new HotCoffee("C001", "Americano", 95),
-                new HotCoffee("C002", "Cappuccino", 120),
+                new HotCoffee("C002", "Cappucino", 120),
                 new IcedCoffee("C003", "Caramel Macchiato", 145),
-                new IcedCoffee("C004", "Iced Latte", 130),
-                new BlendedCoffee("C005", "Mocha Frappuccino", 165)
+                new IcedCoffee("C004", "Matcha Latte", 130),
+                new BlendedCoffee("C005", "Mocha Frappucino", 165)
             };
 
             Console.WriteLine($"Menu loaded with {menuItems.Count} items");
