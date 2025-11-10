@@ -19,6 +19,9 @@ namespace CoffeeShopPOS.Views
             // displays the menu
             DisplayMenu();
 
+            // test CustomerRepository
+            TestCustomerRepository();
+
 
 
             // // Test addons
@@ -37,6 +40,82 @@ namespace CoffeeShopPOS.Views
         {
             var orderWindow = new OrderWindow();
             orderWindow.Show();
+        }
+        private void TestCustomerRepository()
+        {
+            Console.WriteLine("\n=== TESTING CUSTOMER REPOSITORY ===\n");
+            
+            var repo = new CoffeeShopPOS.Services.CustomerRepository();
+            
+            // Test 1: Generate IDs
+            Console.WriteLine("--- Generating Customer IDs ---");
+            string id1 = repo.GenerateNewCustomerId();
+            Console.WriteLine($"Generated ID: {id1}");
+            
+            // Test 2: Create and save customers
+            Console.WriteLine("\n--- Creating Customers ---");
+            
+            var customer1 = new RegularCustomer(id1, "Juan Dela Cruz");
+            customer1.LoyaltyAccount = new LoyaltyAccount(id1, 25);
+            repo.SaveCustomer(customer1);
+            
+            string id2 = repo.GenerateNewCustomerId();
+            var customer2 = new SeniorCustomer(id2, "Maria Santos");
+            customer2.LoyaltyAccount = new LoyaltyAccount(id2, 47);
+            repo.SaveCustomer(customer2);
+            
+            string id3 = repo.GenerateNewCustomerId();
+            var customer3 = new PWDCustomer(id3, "Pedro Reyes");
+            customer3.LoyaltyAccount = new LoyaltyAccount(id3, 12);
+            repo.SaveCustomer(customer3);
+            
+            Console.WriteLine("✓ Saved 3 customers");
+            
+            // Test 3: Load all customers
+            Console.WriteLine("\n--- Loading All Customers ---");
+            var allCustomers = repo.LoadAllCustomers();
+            foreach (var c in allCustomers)
+            {
+                Console.WriteLine($"{c.Id} - {c.Name} ({c.Type}) - {c.LoyaltyAccount?.Points ?? 0} points");
+            }
+            
+            // Test 4: Load specific customer
+            Console.WriteLine("\n--- Loading Specific Customer ---");
+            var loadedCustomer = repo.LoadCustomer(id2);
+            if (loadedCustomer != null)
+            {
+                Console.WriteLine($"Loaded: {loadedCustomer.Name}");
+                Console.WriteLine($"Type: {loadedCustomer.Type}");
+                Console.WriteLine($"Points: {loadedCustomer.LoyaltyAccount?.Points ?? 0}");
+                Console.WriteLine($"Registered: {loadedCustomer.DateRegistered:yyyy-MM-dd}");
+            }
+            
+            // Test 5: Update customer (add points)
+            Console.WriteLine("\n--- Updating Customer Points ---");
+            if (loadedCustomer?.LoyaltyAccount != null)
+            {
+                int oldPoints = loadedCustomer.LoyaltyAccount.Points;
+                loadedCustomer.LoyaltyAccount.EarnPoints(250);  // Earn points from ₱250 purchase
+                int newPoints = loadedCustomer.LoyaltyAccount.Points;
+                
+                Console.WriteLine($"Old points: {oldPoints}");
+                Console.WriteLine($"Earned: {newPoints - oldPoints} points (from ₱250)");
+                Console.WriteLine($"New points: {newPoints}");
+                
+                repo.SaveCustomer(loadedCustomer);
+                Console.WriteLine("✓ Customer updated and saved");
+            }
+            
+            // Test 6: Verify the update persisted
+            Console.WriteLine("\n--- Verifying Persistence ---");
+            var reloadedCustomer = repo.LoadCustomer(id2);
+            if (reloadedCustomer?.LoyaltyAccount != null)
+            {
+                Console.WriteLine($"Reloaded points: {reloadedCustomer.LoyaltyAccount.Points}");
+                Console.WriteLine("✓ Data persisted correctly!");
+            }
+            
+            Console.WriteLine("====================================\n");
         }
 
         private void TestLoyaltyAccount()
