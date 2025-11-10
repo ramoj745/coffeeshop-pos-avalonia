@@ -1,0 +1,278 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="CoffeeShopPOS.Views.CheckoutWindow"
+        Title="Checkout"
+        Width="600" Height="800"
+        WindowStartupLocation="CenterScreen">
+    
+    <ScrollViewer>
+        <StackPanel Margin="20" Spacing="15">
+            
+            <!-- Title -->
+            <TextBlock Text="CHECKOUT"
+                       FontSize="24"
+                       FontWeight="Bold"
+                       HorizontalAlignment="Center"
+                       Margin="0,0,0,10"/>
+            
+            <!-- Order Summary Section -->
+            <Border BorderBrush="Gray"
+                    BorderThickness="1"
+                    CornerRadius="5"
+                    Padding="15">
+                
+                <StackPanel Spacing="10">
+                    <TextBlock Text="ORDER SUMMARY"
+                               FontSize="18"
+                               FontWeight="Bold"/>
+                    
+                    <Separator/>
+                    
+                    <!-- Order Items List -->
+                    <StackPanel x:Name="OrderItemsPanel" Spacing="8">
+                        <!-- Items will be added here programmatically -->
+                    </StackPanel>
+                    
+                    <Separator Margin="0,10"/>
+                    
+                    <!-- Subtotal -->
+                    <Grid>
+                        <TextBlock Text="Subtotal:"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"/>
+                        <TextBlock x:Name="TxtSubtotal"
+                                   Text="₱0.00"
+                                   FontSize="16"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Right"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+            
+            <!-- Customer Type Section -->
+            <Border BorderBrush="Gray"
+                    BorderThickness="1"
+                    CornerRadius="5"
+                    Padding="15">
+                
+                <StackPanel Spacing="10">
+                    <TextBlock Text="CUSTOMER TYPE"
+                               FontSize="18"
+                               FontWeight="Bold"/>
+                    
+                    <Separator/>
+                    
+                    <!-- Customer info if logged in -->
+                    <TextBlock x:Name="TxtCustomerInfo"
+                               Text="Customer: Walk-in"
+                               FontSize="14"
+                               Foreground="Gray"
+                               Margin="0,0,0,10"/>
+                    
+                    <!-- Customer type selection -->
+                    <StackPanel Spacing="8">
+                        <RadioButton x:Name="RbRegular"
+                                     Content="Regular Customer (No discount)"
+                                     GroupName="CustomerType"
+                                     IsChecked="True"
+                                     Click="CustomerType_Changed"/>
+                        
+                        <RadioButton x:Name="RbSenior"
+                                     Content="Senior Citizen (20% discount)"
+                                     GroupName="CustomerType"
+                                     Click="CustomerType_Changed"/>
+                        
+                        <RadioButton x:Name="RbPWD"
+                                     Content="PWD (20% discount)"
+                                     GroupName="CustomerType"
+                                     Click="CustomerType_Changed"/>
+                    </StackPanel>
+                    
+                    <!-- Discount display -->
+                    <Border x:Name="DiscountPanel"
+                            Background="#FFF3E0"
+                            Padding="10"
+                            CornerRadius="5"
+                            IsVisible="False"
+                            Margin="0,10,0,0">
+                        <Grid>
+                            <TextBlock Text="Discount:"
+                                       FontWeight="SemiBold"/>
+                            <TextBlock x:Name="TxtDiscount"
+                                       Text="-₱0.00"
+                                       FontWeight="Bold"
+                                       Foreground="OrangeRed"
+                                       HorizontalAlignment="Right"/>
+                        </Grid>
+                    </Border>
+                    
+                    <!-- After discount -->
+                    <Grid Margin="0,5,0,0">
+                        <TextBlock Text="After Discount:"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"/>
+                        <TextBlock x:Name="TxtAfterDiscount"
+                                   Text="₱0.00"
+                                   FontSize="16"
+                                   FontWeight="Bold"
+                                   HorizontalAlignment="Right"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+            
+            <!-- Loyalty Points Section -->
+            <Border x:Name="LoyaltyPanel"
+                    BorderBrush="Gray"
+                    BorderThickness="1"
+                    CornerRadius="5"
+                    Padding="15"
+                    IsVisible="False">
+                
+                <StackPanel Spacing="10">
+                    <TextBlock Text="LOYALTY POINTS"
+                               FontSize="18"
+                               FontWeight="Bold"/>
+                    
+                    <Separator/>
+                    
+                    <!-- Current points -->
+                    <TextBlock x:Name="TxtCurrentPoints"
+                               Text="Available: 0 points"
+                               FontSize="14"
+                               Foreground="Gray"/>
+                    
+                    <!-- Redemption -->
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <TextBlock Text="Redeem points:"
+                                   VerticalAlignment="Center"/>
+                        <NumericUpDown x:Name="NumPointsToRedeem"
+                                       Minimum="0"
+                                       Maximum="0"
+                                       Increment="10"
+                                       Value="0"
+                                       Width="100"
+                                       ValueChanged="PointsRedemption_Changed"/>
+                        <TextBlock Text="(10 pts = ₱50)"
+                                   VerticalAlignment="Center"
+                                   FontSize="12"
+                                   Foreground="Gray"/>
+                    </StackPanel>
+                    
+                    <!-- Loyalty discount display -->
+                    <Border x:Name="LoyaltyDiscountPanel"
+                            Background="#E8F5E9"
+                            Padding="10"
+                            CornerRadius="5"
+                            IsVisible="False"
+                            Margin="0,10,0,0">
+                        <Grid>
+                            <TextBlock Text="Loyalty Discount:"
+                                       FontWeight="SemiBold"/>
+                            <TextBlock x:Name="TxtLoyaltyDiscount"
+                                       Text="-₱0.00"
+                                       FontWeight="Bold"
+                                       Foreground="Green"
+                                       HorizontalAlignment="Right"/>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+            </Border>
+            
+            <!-- Total Section -->
+            <Border BorderBrush="DarkGray"
+                    BorderThickness="2"
+                    CornerRadius="5"
+                    Padding="15"
+                    Background="#F5F5F5">
+                
+                <Grid>
+                    <TextBlock Text="TOTAL AMOUNT:"
+                               FontSize="20"
+                               FontWeight="Bold"
+                               Foreground="Black"/>
+                    <TextBlock x:Name="TxtTotal"
+                               Text="₱0.00"
+                               FontSize="24"
+                               FontWeight="Bold"
+                               Foreground="DarkGreen"
+                               HorizontalAlignment="Right"/>
+                </Grid>
+            </Border>
+            
+            <!-- Payment Section -->
+            <Border BorderBrush="Gray"
+                    BorderThickness="1"
+                    CornerRadius="5"
+                    Padding="15">
+                
+                <StackPanel Spacing="10">
+                    <TextBlock Text="PAYMENT"
+                               FontSize="18"
+                               FontWeight="Bold"/>
+                    
+                    <Separator/>
+                    
+                    <!-- Cash input -->
+                    <StackPanel Spacing="5">
+                        <TextBlock Text="Cash Payment:"
+                                   FontWeight="SemiBold"/>
+                        <NumericUpDown x:Name="NumPayment"
+                                       Minimum="0"
+                                       Increment="10"
+                                       FormatString="₱0.00"
+                                       Width="200"
+                                       HorizontalAlignment="Left"
+                                       ValueChanged="Payment_Changed"/>
+                    </StackPanel>
+                    
+                    <!-- Change display -->
+                    <Border x:Name="ChangePanel"
+                            Background="#E3F2FD"
+                            Padding="10"
+                            CornerRadius="5"
+                            IsVisible="False"
+                            Margin="0,10,0,0">
+                        <Grid>
+                            <TextBlock Text="Change:"
+                                       FontSize="16"
+                                       FontWeight="Bold"/>
+                            <TextBlock x:Name="TxtChange"
+                                       Text="₱0.00"
+                                       FontSize="18"
+                                       FontWeight="Bold"
+                                       Foreground="Blue"
+                                       HorizontalAlignment="Right"/>
+                        </Grid>
+                    </Border>
+                    
+                    <!-- Insufficient payment warning -->
+                    <TextBlock x:Name="TxtPaymentWarning"
+                               Text="Insufficient payment"
+                               Foreground="Red"
+                               FontWeight="Bold"
+                               IsVisible="False"
+                               Margin="0,5,0,0"/>
+                </StackPanel>
+            </Border>
+            
+            <!-- Action Buttons -->
+            <StackPanel Spacing="10" Margin="0,10,0,0">
+                <Button x:Name="BtnProcessPayment"
+                        Content="Process Payment"
+                        HorizontalAlignment="Stretch"
+                        Height="50"
+                        FontSize="18"
+                        FontWeight="Bold"
+                        IsEnabled="False"
+                        Click="BtnProcessPayment_Click"/>
+                
+                <Button Content="Cancel"
+                        HorizontalAlignment="Stretch"
+                        Height="40"
+                        Click="BtnCancel_Click"/>
+            </StackPanel>
+            
+        </StackPanel>
+    </ScrollViewer>
+    
+</Window>
