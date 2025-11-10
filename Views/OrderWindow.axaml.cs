@@ -4,7 +4,6 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Input;
 using CoffeeShopPOS.Models;
-using Microsoft.VisualBasic;
 
 namespace CoffeeShopPOS.Views
 {
@@ -317,25 +316,12 @@ namespace CoffeeShopPOS.Views
         // event: checkout button clicked
         private void BtnCheckout_Click(object? sender, RoutedEventArgs e)
         {
-            // TODO: Open CheckoutWindow
-            Console.WriteLine("Proceeding to checkout...");
-            Console.WriteLine(currentOrder.GetOrderSummary());
-
-            // For now, just show a message
-            var messageBox = new Window
-            {
-                Title = "Checkout",
-                Width = 300,
-                Height = 150,
-                Content = new TextBlock
-                {
-                    Text = "Checkout window coming soon!\n\nCheck console for order summary.",
-                    HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-                    VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                    TextAlignment = Avalonia.Media.TextAlignment.Center
-                }
-            };
-            messageBox.ShowDialog(this);
+            // Open checkout window with the current order
+            var checkoutWindow = new CheckoutWindow(currentOrder);
+            checkoutWindow.Show();
+            
+            // After checkout completes, close the order window
+            Close();
         }
 
         // event: clear order button clicked
