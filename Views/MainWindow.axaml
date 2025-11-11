@@ -3,7 +3,7 @@
         xmlns:models="using:CoffeeShopPOS.Models"
         x:Class="CoffeeShopPOS.Views.MainWindow"
         Title="RAM'S COFFEE SHOP"
-        Width="800" Height="600"
+        Width="830" Height="600"
         WindowStartupLocation="CenterScreen">
     
     <Grid Margin="20">
