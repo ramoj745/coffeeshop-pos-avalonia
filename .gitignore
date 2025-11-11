@@ -23,5 +23,7 @@ obj/
 # Avalonia specific
 *.log
 
-# customers.json
-# transactions.txt
+# Application Data
+customers.json
+transactions.txt
+transaction_report*
