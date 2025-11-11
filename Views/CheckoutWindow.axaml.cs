@@ -14,6 +14,10 @@ namespace CoffeeShopPOS.Views
         private decimal customerDiscount;
         private decimal loyaltyDiscount;
         private decimal totalAmount;
+
+        // file i/o
+        private Services.CustomerRepository customerRepository;
+        private Services.TransactionLogger transactionLogger;
         
         
         // constructor receives the order from OrderWindow
@@ -22,10 +26,14 @@ namespace CoffeeShopPOS.Views
             InitializeComponent();
             
             this.order = order;
-            
+
             // Create temporary customer for walk-ins
             temporaryCustomer = new RegularCustomer("TEMP", "Walk-in");
             
+            // initialize repositories
+            customerRepository = new Services.CustomerRepository();
+            transactionLogger = new Services.TransactionLogger();
+
             // Initialize display
             InitializeCheckout();
         }
@@ -325,24 +333,50 @@ namespace CoffeeShopPOS.Views
             decimal payment = NumPayment?.Value ?? 0;
             decimal change = payment - totalAmount;
             
-            // Redeem loyalty points if applicable
+            // Prepare loyalty points info
             int pointsRedeemed = 0;
-            if (order.Customer?.LoyaltyAccount != null && loyaltyDiscount > 0)
-            {
-                pointsRedeemed = (int)(NumPointsToRedeem?.Value ?? 0);
-                order.Customer.LoyaltyAccount.RedeemPoints(pointsRedeemed);
-            }
-            
-            // Earn loyalty points if applicable
             int pointsEarned = 0;
+            
+            // Handle loyalty account if customer has one
             if (order.Customer?.LoyaltyAccount != null)
             {
+                // Redeem points if applicable
+                if (loyaltyDiscount > 0)
+                {
+                    pointsRedeemed = (int)(NumPointsToRedeem?.Value ?? 0);
+                    order.Customer.LoyaltyAccount.RedeemPoints(pointsRedeemed);
+                    Console.WriteLine($"Redeemed {pointsRedeemed} loyalty points");
+                }
+                
+                // Earn points from this purchase
                 int pointsBefore = order.Customer.LoyaltyAccount.Points;
                 order.Customer.LoyaltyAccount.EarnPoints(totalAmount);
                 pointsEarned = order.Customer.LoyaltyAccount.Points - pointsBefore;
+                Console.WriteLine($"Earned {pointsEarned} loyalty points from ₱{totalAmount:F2} purchase");
+                
+                // Save updated customer data to file
+                customerRepository.SaveCustomer(order.Customer);
+                Console.WriteLine($"Customer data saved: {order.Customer.Name}");
             }
             
-            // Generate receipt
+            // Log the transaction
+            string customerId = order.Customer?.Id ?? "GUEST"; // default to guest
+            string customerName = order.Customer?.Name ?? "Walk-in Customer";
+            
+            transactionLogger.LogTransaction(
+                orderId: order.OrderId,
+                customerId: customerId,
+                customerName: customerName,
+                totalAmount: totalAmount,
+                discountAmount: customerDiscount,
+                loyaltyRedeemed: loyaltyDiscount,
+                pointsEarned: pointsEarned,
+                pointsRedeemed: pointsRedeemed
+            );
+            
+            Console.WriteLine($"Transaction logged: {order.OrderId}");
+            
+            // Show receipt
             ShowReceipt(payment, change, pointsEarned, pointsRedeemed);
         }
         
@@ -352,7 +386,6 @@ namespace CoffeeShopPOS.Views
         {
             string receipt = GenerateReceipt(payment, change, pointsEarned, pointsRedeemed);
             
-            // Create receipt window
             var receiptWindow = new Window
             {
                 Title = "Receipt",
@@ -361,6 +394,13 @@ namespace CoffeeShopPOS.Views
                 WindowStartupLocation = WindowStartupLocation.CenterScreen
             };
             
+            // Main container - Grid with 2 rows
+            var mainGrid = new Grid
+            {
+                RowDefinitions = new RowDefinitions("*,Auto")
+            };
+            
+            // Receipt text in scrollviewer (row 0)
             var scrollViewer = new ScrollViewer();
             var textBlock = new TextBlock
             {
@@ -369,12 +409,10 @@ namespace CoffeeShopPOS.Views
                 Margin = new Avalonia.Thickness(20),
                 TextWrapping = Avalonia.Media.TextWrapping.Wrap
             };
-            
             scrollViewer.Content = textBlock;
+            Grid.SetRow(scrollViewer, 0);
             
-            var stack = new StackPanel();
-            stack.Children.Add(scrollViewer);
-            
+            // Close button (row 1)
             var closeButton = new Button
             {
                 Content = "Close",
@@ -383,17 +421,31 @@ namespace CoffeeShopPOS.Views
                 Width = 150,
                 Height = 40
             };
+            Grid.SetRow(closeButton, 1);
+            
+            // Add both to grid
+            mainGrid.Children.Add(scrollViewer);
+            mainGrid.Children.Add(closeButton);
+            
+            // Set the grid as window content
+            receiptWindow.Content = mainGrid;
+            
+            // Close button handler
             closeButton.Click += (s, e) =>
             {
                 receiptWindow.Close();
-                this.Close();  // Close checkout window too
             };
-            stack.Children.Add(closeButton);
             
-            receiptWindow.Content = stack;
+            // When receipt window closes, also close checkout
+            receiptWindow.Closed += (s, e) =>
+            {
+                this.Close();
+            };
+            
+            // Show the window
             receiptWindow.ShowDialog(this);
         }
-        
+                
         
         // method: Generate receipt text
         private string GenerateReceipt(decimal payment, decimal change, int pointsEarned, int pointsRedeemed)

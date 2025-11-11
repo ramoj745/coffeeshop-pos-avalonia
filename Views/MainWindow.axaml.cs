@@ -9,20 +9,28 @@ namespace CoffeeShopPOS.Views
     public partial class MainWindow : Window
     {
         private List<Beverage> menuItems = new List<Beverage>();
+        private Services.CustomerRepository customerRepository;
 
         public MainWindow()
         {
             // loads the XAML file
             InitializeComponent();
+
+            // initialize customer repository
+            customerRepository = new Services.CustomerRepository();
             // loads the created objects inside our list
             LoadSampleMenu();
             // displays the menu
             DisplayMenu();
 
+            // create test customers if none exist
+            CreateTestCustomers();
+
             // test CustomerRepository
-            TestCustomerRepository();
+            // TestCustomerRepository();
 
-
+            // test TransactionLogger
+            // TestTransactionLogger();
 
             // // Test addons
             // TestAddOns();
@@ -41,36 +49,267 @@ namespace CoffeeShopPOS.Views
             var orderWindow = new OrderWindow();
             orderWindow.Show();
         }
+        
+        // create test customers
+        private void CreateTestCustomers()
+        {
+            Console.WriteLine("\n=== CREATING TEST CUSTOMERS ===\n");
+            
+            // Check if customers already exist
+            var existing = customerRepository.LoadAllCustomers();
+            if (existing.Count > 0)
+            {
+                Console.WriteLine($"Found {existing.Count} existing customers. Skipping creation.");
+                return;
+            }
+            
+            // Create test customers
+            var customer1 = new RegularCustomer(
+                customerRepository.GenerateNewCustomerId(), 
+                "Juan Dela Cruz"
+            );
+            customer1.LoyaltyAccount = new LoyaltyAccount(customer1.Id, 15);
+            customerRepository.SaveCustomer(customer1);
+            Console.WriteLine($"✓ Created: {customer1.Name} - ID: {customer1.Id}");
+            
+            var customer2 = new SeniorCustomer(
+                customerRepository.GenerateNewCustomerId(),
+                "Maria Santos"
+            );
+            customer2.LoyaltyAccount = new LoyaltyAccount(customer2.Id, 42);
+            customerRepository.SaveCustomer(customer2);
+            Console.WriteLine($"✓ Created: {customer2.Name} - ID: {customer2.Id}");
+            
+            var customer3 = new PWDCustomer(
+                customerRepository.GenerateNewCustomerId(),
+                "Pedro Reyes"
+            );
+            customer3.LoyaltyAccount = new LoyaltyAccount(customer3.Id, 8);
+            customerRepository.SaveCustomer(customer3);
+            Console.WriteLine($"✓ Created: {customer3.Name} - ID: {customer3.Id}");
+            
+            Console.WriteLine("\n✓ Test customers created! Use 'Customer Lookup' to find them.");
+            Console.WriteLine("===================================\n");
+        }
+
+
+        // simple customer lookup
+        private async void BtnCustomerLookup_Click(object? sender, RoutedEventArgs e)
+        {
+            // Create a simple input dialog
+            var inputWindow = new Window
+            {
+                Title = "Customer Lookup",
+                Width = 400,
+                Height = 200,
+                WindowStartupLocation = WindowStartupLocation.CenterScreen
+            };
+            
+            var stack = new StackPanel
+            {
+                Margin = new Avalonia.Thickness(20),
+                Spacing = 15
+            };
+            
+            stack.Children.Add(new TextBlock
+            {
+                Text = "Enter Customer ID:",
+                FontSize = 16,
+                FontWeight = Avalonia.Media.FontWeight.Bold
+            });
+            
+            var txtCustomerId = new TextBox
+            {
+                Watermark = "e.g., C00001",
+                FontSize = 14
+            };
+            stack.Children.Add(txtCustomerId);
+            
+            var btnPanel = new StackPanel
+            {
+                Orientation = Avalonia.Layout.Orientation.Horizontal,
+                Spacing = 10,
+                HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
+                Margin = new Avalonia.Thickness(0, 20, 0, 0)
+            };
+            
+            var btnLookup = new Button
+            {
+                Content = "Lookup",
+                Width = 100,
+                Height = 40
+            };
+            
+            var btnCancel = new Button
+            {
+                Content = "Cancel",
+                Width = 100,
+                Height = 40
+            };
+            
+            btnLookup.Click += (s, args) =>
+            {
+                string customerId = txtCustomerId.Text?.Trim() ?? "";
+                
+                if (string.IsNullOrEmpty(customerId))
+                {
+                    return;
+                }
+                
+                // Load customer
+                var customer = customerRepository.LoadCustomer(customerId);
+                
+                if (customer != null)
+                {
+                    Console.WriteLine($"✓ Customer found: {customer.Name}");
+                    
+                    // Open order window with this customer
+                    var orderWindow = new OrderWindow(customer);
+                    orderWindow.Show();
+                    
+                    inputWindow.Close();
+                }
+                else
+                {
+                    Console.WriteLine($"✗ Customer not found: {customerId}");
+                    
+                    // Show error message
+                    var errorText = new TextBlock
+                    {
+                        Text = "Customer not found!",
+                        Foreground = Avalonia.Media.Brushes.Red,
+                        FontWeight = Avalonia.Media.FontWeight.Bold
+                    };
+                    
+                    if (stack.Children.Count == 3)
+                        stack.Children.RemoveAt(2);
+                    
+                    stack.Children.Insert(2, errorText);
+                }
+            };
+            
+            btnCancel.Click += (s, args) => inputWindow.Close();
+            
+            btnPanel.Children.Add(btnLookup);
+            btnPanel.Children.Add(btnCancel);
+            stack.Children.Add(btnPanel);
+            
+            inputWindow.Content = stack;
+            await inputWindow.ShowDialog(this);
+        }
+
+        private void TestTransactionLogger()
+        {
+            Console.WriteLine("\n=== TESTING TRANSACTION LOGGER ===\n");
+            
+            var logger = new Services.TransactionLogger();
+            
+            // Test 1: Log some transactions
+            Console.WriteLine("--- Logging Transactions ---");
+            
+            logger.LogTransaction(
+                orderId: "ORD-20251106-001",
+                customerId: "C00001",
+                customerName: "Juan Dela Cruz",
+                totalAmount: 362m,
+                discountAmount: 0m,
+                loyaltyRedeemed: 0m,
+                pointsEarned: 7,
+                pointsRedeemed: 0
+            );
+            
+            logger.LogTransaction(
+                orderId: "ORD-20251106-002",
+                customerId: "C00002",
+                customerName: "Maria Santos",
+                totalAmount: 588m,
+                discountAmount: 147m,
+                loyaltyRedeemed: 50m,
+                pointsEarned: 11,
+                pointsRedeemed: 10
+            );
+            
+            logger.LogTransaction(
+                orderId: "ORD-20251106-003",
+                customerId: "GUEST",
+                customerName: "Walk-in Customer",
+                totalAmount: 195m,
+                discountAmount: 0m,
+                loyaltyRedeemed: 0m,
+                pointsEarned: 0,
+                pointsRedeemed: 0
+            );
+            
+            Console.WriteLine("✓ Logged 3 transactions");
+            
+            // Test 2: Load all transactions
+            Console.WriteLine("\n--- Loading All Transactions ---");
+            var allTransactions = logger.LoadAllTransactions();
+            foreach (var t in allTransactions)
+            {
+                Console.WriteLine($"{t.DateTime:HH:mm} | {t.OrderId} | {t.CustomerName} | ₱{t.Amount:F2}");
+            }
+            
+            // Test 3: Load transactions by date
+            Console.WriteLine("\n--- Transactions for Today ---");
+            var todayTransactions = logger.LoadTransactionsByDate(DateTime.Now);
+            Console.WriteLine($"Found {todayTransactions.Count} transactions today");
+            
+            // Test 4: Calculate revenue
+            Console.WriteLine("\n--- Revenue Summary ---");
+            decimal totalRevenue = logger.GetTotalRevenueByDate(DateTime.Now);
+            int transactionCount = logger.GetTransactionCountByDate(DateTime.Now);
+            Console.WriteLine($"Total Transactions: {transactionCount}");
+            Console.WriteLine($"Total Revenue: ₱{totalRevenue:F2}");
+            
+            if (transactionCount > 0)
+            {
+                decimal avgTransaction = totalRevenue / transactionCount;
+                Console.WriteLine($"Average Transaction: ₱{avgTransaction:F2}");
+            }
+            
+            // Test 5: Load transactions by customer
+            Console.WriteLine("\n--- Transactions by Customer ---");
+            var customerTransactions = logger.LoadTransactionsByCustomer("C00002");
+            Console.WriteLine($"Maria Santos has {customerTransactions.Count} transaction(s):");
+            foreach (var t in customerTransactions)
+            {
+                Console.WriteLine($"  {t.OrderId} - ₱{t.Amount:F2} ({t.PointsEarned} pts earned)");
+            }
+                        
+            Console.WriteLine("====================================\n");
+        }
+
         private void TestCustomerRepository()
         {
             Console.WriteLine("\n=== TESTING CUSTOMER REPOSITORY ===\n");
-            
-            var repo = new CoffeeShopPOS.Services.CustomerRepository();
-            
+
+            var repo = new Services.CustomerRepository();
+
             // Test 1: Generate IDs
             Console.WriteLine("--- Generating Customer IDs ---");
             string id1 = repo.GenerateNewCustomerId();
             Console.WriteLine($"Generated ID: {id1}");
-            
+
             // Test 2: Create and save customers
             Console.WriteLine("\n--- Creating Customers ---");
-            
+
             var customer1 = new RegularCustomer(id1, "Juan Dela Cruz");
             customer1.LoyaltyAccount = new LoyaltyAccount(id1, 25);
             repo.SaveCustomer(customer1);
-            
+
             string id2 = repo.GenerateNewCustomerId();
             var customer2 = new SeniorCustomer(id2, "Maria Santos");
             customer2.LoyaltyAccount = new LoyaltyAccount(id2, 47);
             repo.SaveCustomer(customer2);
-            
+
             string id3 = repo.GenerateNewCustomerId();
             var customer3 = new PWDCustomer(id3, "Pedro Reyes");
             customer3.LoyaltyAccount = new LoyaltyAccount(id3, 12);
             repo.SaveCustomer(customer3);
-            
+
             Console.WriteLine("✓ Saved 3 customers");
-            
+
             // Test 3: Load all customers
             Console.WriteLine("\n--- Loading All Customers ---");
             var allCustomers = repo.LoadAllCustomers();
@@ -78,7 +317,7 @@ namespace CoffeeShopPOS.Views
             {
                 Console.WriteLine($"{c.Id} - {c.Name} ({c.Type}) - {c.LoyaltyAccount?.Points ?? 0} points");
             }
-            
+
             // Test 4: Load specific customer
             Console.WriteLine("\n--- Loading Specific Customer ---");
             var loadedCustomer = repo.LoadCustomer(id2);
@@ -89,7 +328,7 @@ namespace CoffeeShopPOS.Views
                 Console.WriteLine($"Points: {loadedCustomer.LoyaltyAccount?.Points ?? 0}");
                 Console.WriteLine($"Registered: {loadedCustomer.DateRegistered:yyyy-MM-dd}");
             }
-            
+
             // Test 5: Update customer (add points)
             Console.WriteLine("\n--- Updating Customer Points ---");
             if (loadedCustomer?.LoyaltyAccount != null)
@@ -97,15 +336,15 @@ namespace CoffeeShopPOS.Views
                 int oldPoints = loadedCustomer.LoyaltyAccount.Points;
                 loadedCustomer.LoyaltyAccount.EarnPoints(250);  // Earn points from ₱250 purchase
                 int newPoints = loadedCustomer.LoyaltyAccount.Points;
-                
+
                 Console.WriteLine($"Old points: {oldPoints}");
                 Console.WriteLine($"Earned: {newPoints - oldPoints} points (from ₱250)");
                 Console.WriteLine($"New points: {newPoints}");
-                
+
                 repo.SaveCustomer(loadedCustomer);
                 Console.WriteLine("✓ Customer updated and saved");
             }
-            
+
             // Test 6: Verify the update persisted
             Console.WriteLine("\n--- Verifying Persistence ---");
             var reloadedCustomer = repo.LoadCustomer(id2);
@@ -114,7 +353,7 @@ namespace CoffeeShopPOS.Views
                 Console.WriteLine($"Reloaded points: {reloadedCustomer.LoyaltyAccount.Points}");
                 Console.WriteLine("✓ Data persisted correctly!");
             }
-            
+
             Console.WriteLine("====================================\n");
         }
 

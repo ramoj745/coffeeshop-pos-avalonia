@@ -89,6 +89,11 @@
                     Width="150" 
                     Height="40"
                     Click="BtnNewOrder_Click"/>
+
+            <Button Content="Customer Lookup" 
+                    Width="150" 
+                    Height="40"
+                    Click="BtnCustomerLookup_Click"/>
             
             <Button Content="Refresh Menu" 
                     Width="150" 
