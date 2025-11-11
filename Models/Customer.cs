@@ -5,9 +5,9 @@ namespace CoffeeShopPOS.Models
     // Base class for RegularCustomer, SeniorCustomer, or PWDCustomer
     public abstract class Customer
     {
-        public string Id { get; set; }
-        public string Name { get; set; }
-        public string Type { get; set; } // Regular, Senior, or PWD
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty; // Regular, Senior, or PWD 
         public DateTime DateRegistered { get; set; }
         public LoyaltyAccount? LoyaltyAccount { get; set; }
 
