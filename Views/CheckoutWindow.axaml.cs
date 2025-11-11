@@ -109,12 +109,24 @@ namespace CoffeeShopPOS.Views
             {
                 // Logged-in customer
                 txtCustomerInfo.Text = $"Customer: {order.Customer.Name} ({order.Customer.Type})";
-                
+
+                if (order.Customer is RegularCustomer)
+                {
+                    RbRegular.IsChecked = true;
+                    RbRegular.IsVisible = true;
+                }
+
                 // Pre-select their customer type
                 if (order.Customer is SeniorCustomer)
+                {
                     RbSenior.IsChecked = true;
+                    RbSenior.IsVisible = true;
+                }
                 else if (order.Customer is PWDCustomer)
+                {
                     RbPWD.IsChecked = true;
+                    RbPWD.IsVisible = true;
+                }
                 
                 // Show loyalty panel if they have a loyalty account
                 if (order.Customer.LoyaltyAccount != null)
@@ -126,6 +138,9 @@ namespace CoffeeShopPOS.Views
             {
                 // Walk-in customer
                 txtCustomerInfo.Text = "Customer: Walk-in";
+                RbRegular.IsVisible = true;
+                RbSenior.IsVisible = true;
+                RbPWD.IsVisible = true;
             }
         }
         
@@ -452,7 +467,7 @@ namespace CoffeeShopPOS.Views
         {
             string receipt = "";
             receipt += "====================================\n";
-            receipt += "   BREW & BEANS COFFEE SHOP\n";
+            receipt += "   RAM'S COFFEE SHOP\n";
             receipt += "   123 Main Street, Manila\n";
             receipt += "   Tel: (02) 1234-5678\n";
             receipt += "====================================\n";
@@ -537,7 +552,7 @@ namespace CoffeeShopPOS.Views
             
             receipt += "====================================\n";
             receipt += "   Thank you for your purchase!\n";
-            receipt += "      Please come again! ☕\n";
+            receipt += "      Please come again! \n";
             receipt += "====================================\n";
             
             return receipt;

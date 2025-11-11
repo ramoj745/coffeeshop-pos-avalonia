@@ -62,7 +62,7 @@
                     
                     <Separator/>
                     
-                    <!-- Customer info if logged in -->
+                    <!-- Customer info -->
                     <TextBlock x:Name="TxtCustomerInfo"
                                Text="Customer: Walk-in"
                                FontSize="14"
@@ -75,16 +75,19 @@
                                      Content="Regular Customer (No discount)"
                                      GroupName="CustomerType"
                                      IsChecked="True"
+                                     IsVisible="False"
                                      Click="CustomerType_Changed"/>
                         
                         <RadioButton x:Name="RbSenior"
                                      Content="Senior Citizen (20% discount)"
                                      GroupName="CustomerType"
+                                     IsVisible="False"
                                      Click="CustomerType_Changed"/>
                         
                         <RadioButton x:Name="RbPWD"
                                      Content="PWD (20% discount)"
                                      GroupName="CustomerType"
+                                     IsVisible="False"
                                      Click="CustomerType_Changed"/>
                     </StackPanel>
                     
