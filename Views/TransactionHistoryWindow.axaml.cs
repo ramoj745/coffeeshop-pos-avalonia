@@ -293,7 +293,7 @@ namespace CoffeeShopPOS.Views
             string report = "";
             
             report += "====================================\n";
-            report += "   BREW & BEANS COFFEE SHOP\n";
+            report += "   RAM'S COFFEE SHOP\n";
             report += "   TRANSACTION REPORT\n";
             report += "====================================\n\n";
             
