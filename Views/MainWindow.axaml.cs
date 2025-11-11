@@ -1,5 +1,7 @@
 using CoffeeShopPOS.Models;
 using System;
+using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -18,20 +20,21 @@ namespace CoffeeShopPOS.Views
 
             // initialize customer repository
             customerRepository = new Services.CustomerRepository();
+
             // loads the created objects inside our list
             LoadSampleMenu();
             // displays the menu
             DisplayMenu();
 
-            // create test customers if none exist
+            // create sample customers and transactions for summaries
             CreateTestCustomers();
+            SeedTransactions();
 
+            // Tests
             // test CustomerRepository
             // TestCustomerRepository();
-
             // test TransactionLogger
             // TestTransactionLogger();
-
             // // Test addons
             // TestAddOns();
             // // Test Customer
@@ -49,12 +52,184 @@ namespace CoffeeShopPOS.Views
             var orderWindow = new OrderWindow();
             orderWindow.Show();
         }
-        
+
+        private void SeedTransactions()
+        {
+            Console.WriteLine("\n=== SEEDING TRANSACTION DATA ===\n");
+            
+            var logger = new Services.TransactionLogger();
+            
+            // Check if transactions already exist
+            var existing = logger.LoadAllTransactions();
+            if (existing.Count > 20)
+            {
+                Console.WriteLine($"Found {existing.Count} existing transactions. Skipping seed.");
+                return;
+            }
+            
+            var random = new Random();
+            
+            // Sample customer names
+            string[] customerNames = 
+            {
+                "Juan Dela Cruz", "Maria Santos", "Pedro Reyes", "Ana Lopez",
+                "Carlos Diaz", "Linda Ramos", "Walk-in Customer", "Jose Garcia",
+                "Carmen Flores", "Miguel Torres"
+            };
+            
+            string[] customerIds = 
+            {
+                "C00001", "C00002", "C00003", "C00004", "C00005",
+                "C00006", "GUEST", "C00007", "C00008", "C00009"
+            };
+            
+            int transactionCounter = 1;
+            
+            // Helper method to create a transaction for a specific date
+            void CreateTransaction(DateTime date)
+            {
+                int customerIndex = random.Next(customerNames.Length);
+                string customerId = customerIds[customerIndex];
+                string customerName = customerNames[customerIndex];
+                
+                // Random amounts
+                decimal amount = random.Next(100, 800);
+                decimal discount = customerIndex == 1 || customerIndex == 2 ? amount * 0.20m : 0; // Senior/PWD
+                decimal loyaltyRedeemed = random.Next(0, 3) == 0 ? 50m : 0m; // 33% chance
+                int pointsEarned = (int)(amount / 50);
+                int pointsRedeemed = loyaltyRedeemed > 0 ? 10 : 0;
+                
+                // Create transaction with specific date
+                var transaction = new Transaction(
+                    $"ORD-{date:yyyyMMdd}-{transactionCounter:D3}",
+                    customerId,
+                    customerName,
+                    amount,
+                    discount,
+                    loyaltyRedeemed,
+                    pointsEarned,
+                    pointsRedeemed
+                );
+                
+                // Override the DateTime to our specific date
+                transaction.DateTime = date;
+                
+                // Manually write to file (since logger always uses DateTime.Now)
+                string logEntry = transaction.ToLogString();
+                File.AppendAllText("transactions.txt", logEntry + Environment.NewLine);
+                
+                transactionCounter++;
+            }
+            
+            
+            Console.WriteLine("Creating transactions for different periods...\n");
+            
+            // TODAY - 8 transactions
+            Console.WriteLine("--- TODAY ---");
+            DateTime today = DateTime.Now.Date;
+            for (int i = 0; i < 8; i++)
+            {
+                DateTime time = today.AddHours(9 + i).AddMinutes(random.Next(0, 60));
+                CreateTransaction(time);
+            }
+            Console.WriteLine("✓ Created 8 transactions for today");
+            
+            
+            // THIS WEEK (excluding today) - 15 transactions
+            Console.WriteLine("\n--- THIS WEEK (past days) ---");
+            DateTime startOfWeek = today.AddDays(-((int)today.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7);
+            
+            for (int day = 0; day < 6; day++) // Last 6 days of this week (not today)
+            {
+                DateTime date = startOfWeek.AddDays(day);
+                if (date < today)
+                {
+                    int transactionsPerDay = random.Next(2, 4);
+                    for (int i = 0; i < transactionsPerDay; i++)
+                    {
+                        DateTime time = date.AddHours(random.Next(9, 20)).AddMinutes(random.Next(0, 60));
+                        CreateTransaction(time);
+                    }
+                }
+            }
+            Console.WriteLine("✓ Created ~15 transactions for earlier this week");
+            
+            
+            // THIS MONTH (excluding this week) - 25 transactions
+            Console.WriteLine("\n--- THIS MONTH (earlier weeks) ---");
+            DateTime startOfMonth = new DateTime(today.Year, today.Month, 1);
+            
+            for (int day = 1; day < startOfWeek.Day; day++)
+            {
+                DateTime date = startOfMonth.AddDays(day - 1);
+                
+                // More transactions on weekdays
+                int transactionsPerDay = date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday 
+                    ? random.Next(1, 3) 
+                    : random.Next(2, 5);
+                
+                for (int i = 0; i < transactionsPerDay; i++)
+                {
+                    DateTime time = date.AddHours(random.Next(8, 21)).AddMinutes(random.Next(0, 60));
+                    CreateTransaction(time);
+                }
+            }
+            Console.WriteLine("✓ Created ~25 transactions for earlier this month");
+            
+            
+            // PREVIOUS MONTHS - 40 transactions
+            Console.WriteLine("\n--- PREVIOUS MONTHS ---");
+            for (int monthsAgo = 1; monthsAgo <= 3; monthsAgo++)
+            {
+                DateTime monthDate = today.AddMonths(-monthsAgo);
+                DateTime monthStart = new DateTime(monthDate.Year, monthDate.Month, 1);
+                int daysInMonth = DateTime.DaysInMonth(monthDate.Year, monthDate.Month);
+                
+                for (int day = 1; day <= daysInMonth; day += random.Next(2, 4))
+                {
+                    DateTime date = monthStart.AddDays(day - 1);
+                    int transactionsPerDay = random.Next(1, 4);
+                    
+                    for (int i = 0; i < transactionsPerDay; i++)
+                    {
+                        DateTime time = date.AddHours(random.Next(8, 21)).AddMinutes(random.Next(0, 60));
+                        CreateTransaction(time);
+                    }
+                }
+            }
+            Console.WriteLine($"✓ Created ~40 transactions for past 3 months");
+            
+            
+            // Reload to verify
+            var allTransactions = logger.LoadAllTransactions();
+            Console.WriteLine($"\n✓ TOTAL TRANSACTIONS: {allTransactions.Count}");
+            
+            // Show breakdown
+            var todayCount = logger.LoadTransactionsByDate(today).Count;
+            var weekTransactions = allTransactions.Where(t => 
+            {
+                int daysFromMonday = ((int)today.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
+                DateTime weekStart = today.AddDays(-daysFromMonday);
+                return t.DateTime.Date >= weekStart && t.DateTime.Date <= today;
+            }).Count();
+            var monthTransactions = allTransactions.Where(t => 
+                t.DateTime.Month == today.Month && t.DateTime.Year == today.Year
+            ).Count();
+            
+            Console.WriteLine($"  - Today: {todayCount}");
+            Console.WriteLine($"  - This Week: {weekTransactions}");
+            Console.WriteLine($"  - This Month: {monthTransactions}");
+            Console.WriteLine($"  - All Time: {allTransactions.Count}");
+            
+            Console.WriteLine("\n✓ Transaction seeding complete!");
+            Console.WriteLine("===================================\n");
+        }
+
         // create test customers
         private void CreateTestCustomers()
         {
             Console.WriteLine("\n=== CREATING TEST CUSTOMERS ===\n");
-            
+
             // Check if customers already exist
             var existing = customerRepository.LoadAllCustomers();
             if (existing.Count > 0)
@@ -62,16 +237,16 @@ namespace CoffeeShopPOS.Views
                 Console.WriteLine($"Found {existing.Count} existing customers. Skipping creation.");
                 return;
             }
-            
+
             // Create test customers
             var customer1 = new RegularCustomer(
-                customerRepository.GenerateNewCustomerId(), 
+                customerRepository.GenerateNewCustomerId(),
                 "Juan Dela Cruz"
             );
             customer1.LoyaltyAccount = new LoyaltyAccount(customer1.Id, 15);
             customerRepository.SaveCustomer(customer1);
             Console.WriteLine($"✓ Created: {customer1.Name} - ID: {customer1.Id}");
-            
+
             var customer2 = new SeniorCustomer(
                 customerRepository.GenerateNewCustomerId(),
                 "Maria Santos"
@@ -79,7 +254,7 @@ namespace CoffeeShopPOS.Views
             customer2.LoyaltyAccount = new LoyaltyAccount(customer2.Id, 42);
             customerRepository.SaveCustomer(customer2);
             Console.WriteLine($"✓ Created: {customer2.Name} - ID: {customer2.Id}");
-            
+
             var customer3 = new PWDCustomer(
                 customerRepository.GenerateNewCustomerId(),
                 "Pedro Reyes"
@@ -87,13 +262,20 @@ namespace CoffeeShopPOS.Views
             customer3.LoyaltyAccount = new LoyaltyAccount(customer3.Id, 8);
             customerRepository.SaveCustomer(customer3);
             Console.WriteLine($"✓ Created: {customer3.Name} - ID: {customer3.Id}");
-            
+
             Console.WriteLine("\n✓ Test customers created! Use 'Customer Lookup' to find them.");
             Console.WriteLine("===================================\n");
         }
+        
+        // transaction history button
+        private void BtnTransactionHistory_Click(object? sender, RoutedEventArgs e)
+        {
+            var historyWindow = new TransactionHistoryWindow();
+            historyWindow.Show();
+        }
 
 
-        // simple customer lookup
+        // customer lookup button
         private async void BtnCustomerLookup_Click(object? sender, RoutedEventArgs e)
         {
             // Create a simple input dialog

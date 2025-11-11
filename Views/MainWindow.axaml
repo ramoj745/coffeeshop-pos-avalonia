@@ -2,7 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:models="using:CoffeeShopPOS.Models"
         x:Class="CoffeeShopPOS.Views.MainWindow"
-        Title="Brew &amp; Beans Coffee Shop"
+        Title="RAM'S COFFEE SHOP"
         Width="800" Height="600"
         WindowStartupLocation="CenterScreen">
     
@@ -15,7 +15,7 @@
         
         <!-- Title -->
         <TextBlock Grid.Row="0" 
-                   Text="BREW &amp; BEANS COFFEE SHOP"
+                   Text="RAM'S COFFEE SHOP"
                    FontSize="28"
                    FontWeight="Bold"
                    HorizontalAlignment="Center"
@@ -85,15 +85,20 @@
                     Spacing="10"
                     Margin="0,20,0,0">
                     
-            <Button Content="New Order" 
+            <Button Content="Walk-In Order" 
                     Width="150" 
                     Height="40"
                     Click="BtnNewOrder_Click"/>
 
-            <Button Content="Customer Lookup" 
+            <Button Content="Customer Order" 
                     Width="150" 
                     Height="40"
                     Click="BtnCustomerLookup_Click"/>
+
+            <Button Content="Transaction History" 
+                    Width="150" 
+                    Height="40"
+                    Click="BtnTransactionHistory_Click"/>
             
             <Button Content="Refresh Menu" 
                     Width="150" 
